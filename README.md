@@ -51,5 +51,17 @@ See [`RUN.md`](./RUN.md) for the file:// fallback and details.
 
 ## Status
 Frozen as-built baseline — see [`DESIGN.md`](./DESIGN.md) for problem, premises,
-success criteria, the learning-science basis, and the security posture. Private
-learning engine; structured to go public as a portfolio piece if I choose to.
+success criteria, the learning-science basis, and the security posture. Now
+public as a portfolio piece in the AI-evaluation engineering portfolio (below).
+
+---
+
+**AI-evaluation engineering portfolio** — five repos, one discipline:
+
+- [**ai-eval-toolkit**](https://github.com/Mike-E-Log/ai-eval-toolkit) — judge-vs-human calibration (Cohen's κ / Kendall-τ vs Landis–Koch bands)
+- [**agentic-eval-harness**](https://github.com/Mike-E-Log/agentic-eval-harness) — eval-gated Claude Code phase boundaries with cross-vendor scorecards
+- [**ai-eval-atlas**](https://github.com/Mike-E-Log/ai-eval-atlas) — practitioner + technique map, source-linked
+- [**ai-engineer-best-practices**](https://github.com/Mike-E-Log/ai-engineer-best-practices) — handbook + `score` MCP tool (3-vendor judge ensemble)
+- **learn-ai-eval** *(you are here)* — Claude-tutored learning engine for the eval canon
+
+Profile: [github.com/Mike-E-Log](https://github.com/Mike-E-Log) · website: [mikeilog.com](https://mikeilog.com)
