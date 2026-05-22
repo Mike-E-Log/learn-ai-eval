@@ -1,0 +1,25 @@
+# Never commit secrets or local key material
+.key
+.key.local
+*.local
+.env
+.env.*
+
+# Node
+node_modules/
+
+# Security reports stay local
+.gstack/
+
+# Personal notes (if you later move them out of the browser into files)
+notes/
+
+# Learning history / audit trail (personal; remove this line if you want it version-controlled)
+history/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large binary artifact (22MB) — uncomment-exclude by default; add deliberately if you want it versioned
+*.pptx

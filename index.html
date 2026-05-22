@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Eval Codex — learn-ai-eval</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root, [data-theme="light"]{
+    --bg:#f4f1ea;--bg-2:#ece8de;--panel:#fffefb;--panel-2:#fbf9f3;--panel-edge:rgba(70,55,30,.14);
+    --ink:#23202c;--ink-dim:#5d586c;--ink-faint:#9b94a6;
+    --gold:#a9760a;--gold-bright:#c89015;--cyan:#0c8a9c;--violet:#6a4cc0;--amber:#bd7d12;--red:#cc4040;
+    --node-bg:linear-gradient(165deg,#fffefb,#f6f2e8);--h1-grad:linear-gradient(180deg,#2c2740 0%,#6a4cc0 120%);
+    --shadow-soft:0 12px 34px rgba(60,45,20,.10);--glow-cyan:0 6px 22px rgba(12,138,156,.26);--glow-gold:0 6px 24px rgba(169,118,10,.28);
+    --grain-op:.035;--track:rgba(40,30,10,.08);--bubble-a:#f1ede3;--bubble-u:linear-gradient(135deg,#6a4cc0,#0c8a9c);
+    --mesh:radial-gradient(55% 45% at 16% 10%, rgba(170,140,255,.14), transparent 60%),radial-gradient(50% 42% at 86% 18%, rgba(40,170,190,.12), transparent 62%),radial-gradient(60% 55% at 72% 96%, rgba(220,170,60,.12), transparent 58%),linear-gradient(180deg,#f4f1ea 0%, #efebe1 60%, #f1ede3 100%);
+  }
+  [data-theme="dark"]{
+    --bg:#08080d;--bg-2:#0d0d16;--panel:rgba(22,22,34,.9);--panel-2:rgba(28,28,42,.7);--panel-edge:rgba(140,130,200,.18);
+    --ink:#ecebf5;--ink-dim:#a39ec0;--ink-faint:#6b6685;
+    --gold:#f5c451;--gold-bright:#f8d27a;--cyan:#4fd8e6;--violet:#b49bff;--amber:#f5a623;--red:#ff6b6b;
+    --node-bg:linear-gradient(160deg,rgba(32,32,50,.92),rgba(14,14,22,.94));--h1-grad:linear-gradient(180deg,#fff 0%, #cdc8e6 45%, #8c86ad 100%);
+    --shadow-soft:0 10px 34px rgba(0,0,0,.55);--glow-cyan:0 0 18px rgba(79,216,230,.5), 0 0 44px rgba(79,216,230,.2);--glow-gold:0 0 22px rgba(245,196,81,.55), 0 0 58px rgba(245,196,81,.22);
+    --grain-op:.06;--track:rgba(255,255,255,.07);--bubble-a:rgba(40,40,58,.8);--bubble-u:linear-gradient(135deg,#7c5cd6,#1b9aab);
+    --mesh:radial-gradient(60% 50% at 18% 12%, rgba(120,80,220,.22), transparent 60%),radial-gradient(55% 45% at 85% 20%, rgba(40,180,200,.16), transparent 60%),radial-gradient(70% 60% at 70% 95%, rgba(245,196,81,.10), transparent 55%),radial-gradient(50% 50% at 30% 80%, rgba(167,139,250,.14), transparent 60%),linear-gradient(180deg,#08080d 0%, #0a0a12 55%, #07070c 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Atkinson Hyperlegible',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;line-height:1.6;position:relative;letter-spacing:.005em;transition:background .5s,color .5s}
+  body::before{content:"";position:fixed;inset:0;z-index:-2;background:var(--mesh);transition:background .5s}
+  body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:var(--grain-op);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  .top-btns{position:fixed;top:20px;right:22px;z-index:60;display:flex;gap:10px}
+  .ic-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--panel-edge);background:var(--panel);color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:19px;box-shadow:var(--shadow-soft);transition:transform .3s,box-shadow .3s,background .4s}
+  .ic-btn:hover{transform:translateY(-2px) rotate(-12deg);box-shadow:var(--glow-gold)}
+
+  header{padding:58px 0 18px;text-align:center;opacity:0;animation:rise .9s .05s forwards cubic-bezier(.2,.7,.2,1)}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--cyan)}
+  h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(40px,7.4vw,80px);letter-spacing:-.01em;margin:.16em 0 .14em;line-height:1.02;background:var(--h1-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:var(--ink-dim);font-size:clamp(15px,1.6vw,18px);max-width:640px;margin:0 auto}
+  .sub b{color:var(--gold);font-weight:700}.sub .g{color:var(--red);font-weight:700}.sub .c{color:var(--cyan);font-weight:700}
+
+  .hud{margin:36px auto 8px;max-width:880px;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;opacity:0;animation:rise .9s .22s forwards cubic-bezier(.2,.7,.2,1)}
+  .card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow-soft);position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+  .rank-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink-faint)}
+  .rank-name{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(23px,3vw,31px);margin:.16em 0 .55em;color:var(--gold)}
+  .xp-track{height:9px;border-radius:99px;background:var(--track);overflow:hidden}
+  .xp-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--violet),var(--cyan) 70%,var(--gold-bright));transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+  .xp-meta{display:flex;justify-content:space-between;margin-top:9px;font-size:12.5px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 10px;align-content:center;height:100%}
+  .stat{display:flex;flex-direction:column;gap:2px}
+  .stat .n{font-family:'Fraunces',serif;font-weight:700;font-size:27px;line-height:1}
+  .stat .l{font-size:11.5px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
+
+  .sprint{max-width:880px;margin:18px auto 6px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;opacity:0;animation:rise .9s .34s forwards cubic-bezier(.2,.7,.2,1)}
+  .pill{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-dim);background:var(--panel-2);border:1px solid var(--panel-edge);border-radius:99px;padding:7px 15px}
+  .pill b{color:var(--cyan)}.pill.warn b{color:var(--amber)}
+  .pill.review{cursor:pointer;transition:.2s}.pill.review:hover{border-color:var(--cyan);color:var(--ink)}
+  .pill.review.has{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+
+  .loop{max-width:980px;margin:42px auto 12px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;opacity:0;animation:rise .9s .46s forwards cubic-bezier(.2,.7,.2,1)}
+  .loop-step{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.04em;color:var(--ink-dim);border:1px solid var(--panel-edge);border-radius:10px;padding:6px 11px;background:var(--panel-2);white-space:nowrap}
+  .loop-step b{color:var(--violet)}.loop-arrow{color:var(--ink-faint);font-size:13px}
+
+  .daily-wrap{text-align:center;margin:26px 0 4px;opacity:0;animation:rise .9s .52s forwards cubic-bezier(.2,.7,.2,1)}
+  .daily-btn{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.05em;padding:14px 28px;border-radius:13px;cursor:pointer;color:#fff;border:1px solid transparent;background:linear-gradient(135deg,var(--violet),var(--cyan));box-shadow:var(--glow-cyan);transition:.25s}
+  .daily-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px color-mix(in srgb,var(--cyan) 42%,transparent)}
+  .daily-hint{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);margin-top:9px}
+
+  .tree-head{text-align:center;margin:54px 0 6px}
+  .tree-head .kicker{color:var(--violet)}
+  .tree-head h2{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(26px,3.4vw,38px);letter-spacing:-.01em;margin-top:.18em}
+  .legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:14px 0 6px;font-size:12.5px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+
+  .tree-scroll{overflow-x:auto;padding:30px 0 60px;-webkit-overflow-scrolling:touch}
+  .tree{position:relative;min-width:920px;margin:0 auto;max-width:1080px;padding:0 10px}
+  .tier{display:flex;justify-content:center;gap:clamp(18px,3vw,46px);position:relative;z-index:2;margin:0 0 56px}
+  .tier:last-child{margin-bottom:0}
+  svg.links{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
+  svg.links path{fill:none;stroke:url(#linkgrad);stroke-width:2.2;opacity:0;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.1s forwards ease-out,fadeline .3s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}@keyframes fadeline{to{opacity:.55}}
+
+  .node{position:relative;width:150px;cursor:pointer;opacity:0;transform:scale(.86) translateY(8px);animation:pop .6s forwards cubic-bezier(.2,.8,.2,1)}
+  .node-core{position:relative;background:var(--node-bg);border:1.5px solid var(--ring,var(--panel-edge));border-radius:16px;padding:15px 13px 14px;text-align:center;transition:transform .25s,box-shadow .3s,border-color .3s;box-shadow:var(--shadow-soft)}
+  .node:hover .node-core{transform:translateY(-5px);box-shadow:var(--glow,var(--shadow-soft))}
+  .node-num{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--ink-faint)}
+  .node-title{font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;line-height:1.22;margin-top:6px;color:var(--ink)}
+  .node-status{margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ring,var(--ink-dim))}
+  .node .crest{position:absolute;top:-9px;right:-9px;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:11px;background:var(--panel);border:1.5px solid var(--gold);color:var(--gold);box-shadow:var(--glow-gold)}
+  .node .due-badge{position:absolute;top:-9px;left:-9px;width:23px;height:23px;border-radius:50%;display:none;place-items:center;font-size:12px;background:var(--panel);border:1.5px solid var(--cyan);color:var(--cyan);box-shadow:var(--glow-cyan)}
+  .node[data-due="1"] .due-badge{display:grid}
+  .node[data-due="1"] .node-core{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:var(--glow-cyan)}50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--cyan) 26%,transparent),var(--glow-cyan)}}
+  .node[data-state="solid"]{--ring:var(--cyan);--glow:var(--glow-cyan)}
+  .node[data-state="solid"] .node-core{box-shadow:var(--glow-cyan)}
+  .node[data-state="shaky"]{--ring:var(--amber);--glow:0 6px 20px rgba(189,125,18,.32)}
+  .node[data-state="gap"]{--ring:var(--red);--glow:0 6px 20px rgba(204,64,64,.3)}
+  .node[data-state="todo"]{--ring:var(--panel-edge);--glow:var(--shadow-soft)}
+
+  .scrim{position:fixed;inset:0;background:rgba(20,16,30,.4);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s;z-index:40}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(490px,92vw);z-index:50;background:var(--panel);border-left:1px solid var(--panel-edge);transform:translateX(103%);transition:transform .42s cubic-bezier(.3,.8,.25,1);display:flex;flex-direction:column;box-shadow:-30px 0 80px rgba(0,0,0,.28)}
+  .drawer.open{transform:translateX(0)}
+  .drawer-scroll{overflow-y:auto;padding:30px 30px 44px}
+  .drawer .num{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.28em;color:var(--cyan)}
+  .drawer h3{font-family:'Fraunces',serif;font-weight:700;font-size:28px;line-height:1.16;margin:.25em 0 .18em}
+  .drawer .desc{color:var(--ink-dim);font-size:15px}
+  .close{position:absolute;top:18px;right:20px;width:34px;height:34px;border-radius:50%;border:1px solid var(--panel-edge);background:var(--panel-2);color:var(--ink-dim);font-size:17px;cursor:pointer;transition:.25s;z-index:2}
+  .close:hover{color:var(--ink);border-color:var(--cyan);transform:rotate(90deg)}
+  .section-l{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);margin:24px 0 11px;display:flex;align-items:center;gap:10px}
+  .section-l::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--panel-edge),transparent)}
+  .anchor-box{background:color-mix(in srgb,var(--cyan) 8%,var(--panel));border:1px solid color-mix(in srgb,var(--cyan) 35%,transparent);border-radius:12px;padding:13px 15px}
+  .anchor-box .src{font-weight:700;font-size:14.5px}
+  .anchor-box a{color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;text-decoration:none}
+  .anchor-box a:hover{text-decoration:underline}
+  .review-box{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink-dim);background:var(--panel-2);border:1px solid var(--panel-edge);border-radius:12px;padding:11px 14px}
+  .review-box.due{color:var(--cyan);border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+  .revbtn{font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 12px;border-radius:9px;border:1px solid var(--cyan);background:transparent;color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap}
+  .revbtn:hover{background:color-mix(in srgb,var(--cyan) 14%,transparent)}
+  ol.loopsteps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:9px}
+  ol.loopsteps li{counter-increment:s;position:relative;padding-left:34px;font-size:14px;color:var(--ink-dim)}
+  ol.loopsteps li::before{content:counter(s);position:absolute;left:0;top:-1px;width:23px;height:23px;border-radius:7px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--violet);background:color-mix(in srgb,var(--violet) 12%,var(--panel));border:1px solid color-mix(in srgb,var(--violet) 32%,transparent)}
+  ol.loopsteps li b{color:var(--ink)}
+  .status-row{display:flex;gap:8px;flex-wrap:wrap}
+  .sbtn{flex:1;min-width:74px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 6px;border-radius:10px;border:1px solid var(--panel-edge);background:var(--panel-2);color:var(--ink-dim);cursor:pointer;transition:.2s}
+  .sbtn:hover{color:var(--ink);transform:translateY(-2px)}
+  .sbtn[data-s="gap"].active{color:var(--red);border-color:var(--red)}
+  .sbtn[data-s="shaky"].active{color:var(--amber);border-color:var(--amber)}
+  .sbtn[data-s="solid"].active{color:var(--cyan);border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+  .sbtn[data-s="todo"].active{color:var(--ink);border-color:var(--ink-dim)}
+  .startbtn{width:100%;margin-top:4px;padding:14px;border-radius:12px;border:1px solid transparent;background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.05em;cursor:pointer;transition:.25s;box-shadow:var(--glow-cyan)}
+  .startbtn:hover{transform:translateY(-2px)}
+  .copy-link{display:block;text-align:center;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);background:none;border:none;cursor:pointer;width:100%}
+  .copy-link:hover{color:var(--cyan)}
+  .teach{font-size:14.5px;color:var(--ink-dim)}
+  .teach h4{font-family:'Fraunces',serif;font-weight:600;color:var(--ink);font-size:16px;margin:17px 0 5px}
+  .teach b{color:var(--gold);font-weight:700}
+  .teach .vocab{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .teach .vocab span{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--cyan);background:color-mix(in srgb,var(--cyan) 9%,var(--panel));border:1px solid color-mix(in srgb,var(--cyan) 28%,transparent);border-radius:6px;padding:3px 8px}
+
+  /* ===== MODAL ===== */
+  .modal{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:rgba(20,16,30,.5);backdrop-filter:blur(4px);padding:20px}
+  .modal.open{display:grid}
+  .modal-box{position:relative;width:min(440px,95vw);background:var(--panel);border:1px solid var(--panel-edge);border-radius:18px;padding:30px;box-shadow:var(--shadow-soft)}
+  .modal-box h3{font-family:'Fraunces',serif;font-weight:700;font-size:23px;margin-bottom:8px}
+  .modal-p{font-size:13px;color:var(--ink-dim);margin-bottom:18px}
+  .modal-box label{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 6px}
+  .modal-box input,.modal-box select{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--panel-edge);background:var(--panel-2);color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:13px}
+  .modal-box input:disabled{opacity:.45;cursor:not-allowed}
+  .save-btn{width:100%;margin-top:20px;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.05em;cursor:pointer;transition:.2s}
+  .save-btn:hover{transform:translateY(-2px)}
+  .modal-note{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:12px;text-align:center;min-height:14px}
+  .modal-note.ok{color:var(--cyan)}.modal-note.err{color:var(--red)}
+
+  /* ===== CHAT ===== */
+  .chat-overlay{position:fixed;inset:0;z-index:65;display:none;background:rgba(15,12,24,.55);backdrop-filter:blur(5px);padding:clamp(10px,3vh,40px) 20px}
+  .chat-overlay.open{display:grid;place-items:center}
+  .chat-box{width:min(760px,100%);height:min(86vh,820px);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--panel-edge);border-radius:20px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.4)}
+  .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--panel-edge);background:var(--panel-2)}
+  .chat-node{font-family:'Fraunces',serif;font-weight:700;font-size:18px}
+  .chat-mode{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin-top:2px}
+  .chat-actions{display:flex;gap:8px}
+  .chat-mini{font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 12px;border-radius:9px;border:1px solid var(--panel-edge);background:var(--panel);color:var(--ink-dim);cursor:pointer;transition:.2s}
+  .chat-mini:hover{color:var(--ink);border-color:var(--cyan)}
+  .chat-mini.solid{border-color:var(--cyan);color:var(--cyan)}
+  .chat-msgs{flex:1;overflow-y:auto;padding:22px 20px;display:flex;flex-direction:column;gap:14px}
+  .msg{max-width:86%;padding:13px 16px;border-radius:15px;font-size:14.5px;line-height:1.6;white-space:normal}
+  .msg.a{align-self:flex-start;background:var(--bubble-a);color:var(--ink);border-bottom-left-radius:5px}
+  .msg.u{align-self:flex-end;background:var(--bubble-u);color:#fff;border-bottom-right-radius:5px}
+  .msg.sys{align-self:center;background:none;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:11.5px;text-align:center;max-width:100%}
+  .msg.err{align-self:center;background:color-mix(in srgb,var(--red) 14%,var(--panel));color:var(--red);border:1px solid var(--red);font-size:13px;max-width:100%}
+  .msg b{font-weight:700}.msg code{font-family:'JetBrains Mono',monospace;font-size:.88em;background:color-mix(in srgb,var(--ink) 10%,transparent);padding:1px 5px;border-radius:5px}
+  .msg.a b{color:var(--gold)}
+  .typing{align-self:flex-start;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 16px}
+  .typing span{animation:blink 1.2s infinite}.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+  .chat-input{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--panel-edge);background:var(--panel-2)}
+  .chat-input textarea{flex:1;resize:none;max-height:140px;padding:12px 14px;border-radius:12px;border:1px solid var(--panel-edge);background:var(--panel);color:var(--ink);font-family:'Atkinson Hyperlegible',sans-serif;font-size:14.5px;line-height:1.5}
+  .chat-input textarea:focus{outline:none;border-color:var(--cyan)}
+  .send-btn{padding:0 22px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;cursor:pointer;transition:.2s}
+  .send-btn:hover{transform:translateY(-2px)}.send-btn:disabled{opacity:.5;cursor:default;transform:none}
+  .h-sess{font-family:'Fraunces',serif;font-weight:700;font-size:17px;color:var(--violet);margin:18px 0 2px}
+  .h-meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);margin-bottom:8px}
+  .h-msg{font-size:13.5px;line-height:1.55;margin:6px 0;padding:9px 13px;border-radius:11px;background:var(--panel-2);white-space:pre-wrap}
+  .h-msg .who{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+  .h-tl{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-dim);padding:3px 2px}
+  .h-empty{color:var(--ink-faint);text-align:center;padding:40px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7}
+
+  footer{text-align:center;padding:30px 24px 54px;color:var(--ink-faint);font-size:12px;font-family:'JetBrains Mono',monospace}
+  footer b{color:var(--ink-dim)}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pop{to{opacity:1;transform:scale(1) translateY(0)}}
+  @media (max-width:680px){.hud{grid-template-columns:1fr}.loop{gap:4px}.loop-step{font-size:10px;padding:5px 8px}}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.12s!important}svg.links path{opacity:.55;stroke-dashoffset:0}.node[data-due="1"] .node-core{animation:none}}
+</style>
+</head>
+<body>
+  <div class="top-btns">
+    <button class="ic-btn" id="histBtn" title="Learning history & audit trail">🕘</button>
+    <button class="ic-btn" id="setBtn" title="Tutor settings (API key)">⚙</button>
+    <button class="ic-btn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme">☾</button>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div class="kicker">learn-ai-eval · sprint then marathon</div>
+      <h1>The Eval Codex</h1>
+      <p class="sub">Thirteen fundamentals stand between you and <b>conversant eval fluency</b>.<span style="display:block;margin-top:.7em">Light each node from <span class="g">gap</span> to <span class="c">solid</span> — Claude tutors you right here, spaced review keeps it stuck.</span></p>
+    </header>
+
+    <div class="hud">
+      <div class="card">
+        <div class="rank-label">Current rank</div>
+        <div class="rank-name" id="rankName">Vibes-Based Novice</div>
+        <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+        <div class="xp-meta"><span id="xpCount">0 / 13 solid</span><span id="xpNext"></span></div>
+      </div>
+      <div class="card">
+        <div class="stat-grid">
+          <div class="stat"><span class="n" style="color:var(--cyan)" id="cSolid">0</span><span class="l"><span class="dot" style="background:var(--cyan)"></span>solid</span></div>
+          <div class="stat"><span class="n" style="color:var(--amber)" id="cShaky">0</span><span class="l"><span class="dot" style="background:var(--amber)"></span>shaky</span></div>
+          <div class="stat"><span class="n" style="color:var(--red)" id="cGap">0</span><span class="l"><span class="dot" style="background:var(--red)"></span>gap</span></div>
+          <div class="stat"><span class="n" style="color:var(--ink-dim)" id="cTodo">13</span><span class="l"><span class="dot" style="background:var(--ink-faint)"></span>untouched</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sprint">
+      <span class="pill">Sprint 1 · core 8 · <b id="s1">0/8</b> by <b>Jun 1</b></span>
+      <span class="pill warn">Sprint 2 · last 5 · <b id="s2">0/5</b> by <b>Jun 8</b></span>
+      <span class="pill review" id="reviewPill">↻ Review · <b id="dueCount">0</b> due</span>
+    </div>
+
+    <div class="loop">
+      <span class="loop-step"><b>0</b> Anchor</span><span class="loop-arrow">→</span>
+      <span class="loop-step"><b>1</b> Teach</span><span class="loop-arrow">→</span>
+      <span class="loop-step"><b>2</b> Capture</span><span class="loop-arrow">→</span>
+      <span class="loop-step"><b>3</b> Quiz</span><span class="loop-arrow">→</span>
+      <span class="loop-step"><b>4</b> Grade</span><span class="loop-arrow">→</span>
+      <span class="loop-step"><b>5</b> Remediate</span>
+    </div>
+
+    <div class="daily-wrap">
+      <button class="daily-btn" id="dailyBtn">▶ Start today's session</button>
+      <div class="daily-hint">predict → new node (2 examples) → interleaved review → mock-interview → grade &amp; calibrate</div>
+    </div>
+
+    <div class="tree-head">
+      <div class="kicker">the talent tree</div>
+      <h2>AI Eval — Fundamentals</h2>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--cyan)"></span>solid</span>
+        <span><span class="dot" style="background:var(--amber)"></span>shaky</span>
+        <span><span class="dot" style="background:var(--red)"></span>gap</span>
+        <span><span class="dot" style="background:var(--ink-faint)"></span>untouched</span>
+        <span style="color:var(--cyan)">↻ due</span>
+        <span style="color:var(--gold)">◆ core-8 (Jun 1)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tree-scroll">
+    <div class="tree" id="tree">
+      <svg class="links" id="links"><defs>
+        <linearGradient id="linkgrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8a6fd6"/><stop offset="100%" stop-color="#1b9aab"/>
+        </linearGradient></defs>
+      </svg>
+    </div>
+  </div>
+
+  <footer>Private learning engine · tutored in-app by Claude (your API key, stored only in this browser) · progress saved locally</footer>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer"><button class="close" id="close">✕</button><div class="drawer-scroll" id="drawerBody"></div></aside>
+
+  <!-- settings modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-box">
+      <button class="close" id="setClose">✕</button>
+      <h3>Tutor settings</h3>
+      <p class="modal-p" id="setIntro">The tutor calls the Anthropic API directly with your key. It's stored only in this browser (localStorage), sent only to api.anthropic.com, and never written into the repo. Don't host this file publicly with a key saved.</p>
+      <label>Anthropic API key</label>
+      <input type="password" id="setKey" placeholder="sk-ant-..." autocomplete="off" />
+      <label>Model</label>
+      <select id="setModel">
+        <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — recommended (cheap, sharp)</option>
+        <option value="claude-opus-4-7">Claude Opus 4.7 — best, pricier</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — fastest, cheapest</option>
+      </select>
+      <button class="save-btn" id="setSave">Save</button>
+      <div class="modal-note" id="setNote">If a model name is rejected, update it here — IDs change over time.</div>
+    </div>
+  </div>
+
+  <!-- chat overlay -->
+  <div class="chat-overlay" id="chatOverlay">
+    <div class="chat-box">
+      <div class="chat-head">
+        <div><div class="chat-node" id="chatNode">Session</div><div class="chat-mode" id="chatMode"></div></div>
+        <div class="chat-actions">
+          <button class="chat-mini solid" id="chatSolid" style="display:none">✓ mark solid</button>
+          <button class="chat-mini" id="chatReset" title="Restart this session">↺</button>
+          <button class="chat-mini" id="chatClose">✕</button>
+        </div>
+      </div>
+      <div class="chat-msgs" id="chatMsgs"></div>
+      <div class="chat-input">
+        <textarea id="chatText" rows="1" placeholder="Type your answer…  (Enter to send · Shift+Enter for newline)"></textarea>
+        <button class="send-btn" id="chatSend">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- history / audit trail overlay -->
+  <div class="chat-overlay" id="histOverlay">
+    <div class="chat-box">
+      <div class="chat-head">
+        <div><div class="chat-node">Learning history</div><div class="chat-mode">audit trail · everything that has happened</div></div>
+        <div class="chat-actions">
+          <button class="chat-mini" id="histExport">⤓ export .md</button>
+          <button class="chat-mini" id="histClose">✕</button>
+        </div>
+      </div>
+      <div class="chat-msgs" id="histBody"></div>
+    </div>
+  </div>
+
+<script>
+const NODES = [
+  {id:1,tier:0,deps:[],core:true,title:"The Eval Mindset",desc:"Why eval is the bottleneck for AI products, and why evals are the development loop — not a QA afterthought.",anchor:{src:"Hamel Husain — \"Your AI Product Needs Evals\"",url:"https://hamel.dev/blog/posts/evals/"},
+   teach:`<h4>The core claim</h4><p>In normal software, correctness is deterministic. LLM systems are probabilistic and the spec is fuzzy. The hard part isn't writing code, it's <b>knowing whether a change made things better or worse.</b> Eval answers that with evidence instead of vibes.</p>
+   <h4>Eval-driven development</h4><p>TDD for AI: <b>write the eval first</b>, iterate against it. Flywheel: <b>look at data → write evals → measure → improve → repeat.</b></p>
+   <h4>The failure mode</h4><p>Building a giant harness <b>before</b> looking at data — eval-as-procrastination. Start with the cheapest eval that catches real failures.</p>
+   <div class="vocab"><span>eval-driven dev</span><span>error analysis</span><span>the flywheel</span><span>eval = the spec</span><span>vibes-based</span></div>`},
+  {id:2,tier:1,deps:[1],core:true,title:"Eval Taxonomy",desc:"Offline vs online, reference-based vs reference-free, capability vs safety, unit vs holistic.",anchor:{src:"Eugene Yan — \"Patterns for LLM Systems & Products\"",url:"https://eugeneyan.com/writing/llm-patterns/"}},
+  {id:3,tier:2,deps:[2],core:true,title:"Eval Datasets",desc:"Golden/labeled sets, coverage, slicing, data leakage & contamination, train/test hygiene.",anchor:{src:"Hamel & Shreya — \"A Field Guide to Rapidly Improving AI Products\"",url:"https://hamel.dev/blog/posts/field-guide/"}},
+  {id:4,tier:2,deps:[2],core:true,title:"Metrics",desc:"Precision/recall/F1, ranking (Kendall-τ, nDCG), BLEU/ROUGE caveats, exact-match, pass@k.",anchor:{src:"Eugene Yan — \"Patterns for LLM Systems & Products\"",url:"https://eugeneyan.com/writing/llm-patterns/"}},
+  {id:5,tier:2,deps:[2],core:true,title:"LLM-as-Judge",desc:"Pairwise vs pointwise, rubrics, position/verbosity/self-preference bias, judge–human agreement.",anchor:{src:"Zheng et al. — \"Judging LLM-as-a-Judge (MT-Bench)\"",url:"https://arxiv.org/abs/2306.05685"}},
+  {id:7,tier:2,deps:[2],core:true,title:"Agentic Eval",desc:"Trajectory eval, tool-use correctness, task-success vs process, sandboxes, harnesses.",anchor:{src:"UK AISI — Inspect framework docs",url:"https://inspect.aisi.org.uk/"}},
+  {id:8,tier:3,deps:[3],core:true,title:"Benchmarks & Pitfalls",desc:"MMLU/GPQA/SWE-bench, contamination, Goodhart, overfitting, why leaderboards mislead.",anchor:{src:"Stanford CRFM — HELM",url:"https://crfm.stanford.edu/helm/"}},
+  {id:9,tier:3,deps:[4],core:true,title:"Statistics for Eval",desc:"Sample size, confidence intervals, significance, run-to-run variance, why N=10 lies.",anchor:{src:"Miller (Anthropic) — \"Adding Error Bars to Evals\"",url:"https://arxiv.org/abs/2411.00640"}},
+  {id:6,tier:3,deps:[5],core:false,title:"Human Eval",desc:"Annotation protocols, inter-annotator agreement (Cohen's/Fleiss' κ), open & axial coding.",anchor:{src:"Shankar et al. — \"Who Validates the Validators?\"",url:"https://arxiv.org/abs/2404.12272"}},
+  {id:11,tier:3,deps:[5],core:false,title:"RAG Eval",desc:"Retrieval metrics, faithfulness/groundedness, context & answer relevance (RAGAS-style).",anchor:{src:"Es et al. — \"RAGAS\"",url:"https://arxiv.org/abs/2309.15217"}},
+  {id:12,tier:3,deps:[7],core:false,title:"Safety / Red-Team Eval",desc:"Jailbreaks, refusal rates, harmful-content rates, robustness, automated red-teaming.",anchor:{src:"Perez et al. — \"Red Teaming LMs with LMs\"",url:"https://arxiv.org/abs/2202.03286"}},
+  {id:10,tier:4,deps:[9],core:false,title:"Regression / CI Gates",desc:"Eval-in-the-loop, gating deploys, production observability & tracing.",anchor:{src:"Braintrust — Evals in CI/CD docs",url:"https://www.braintrust.dev/docs"}},
+  {id:13,tier:5,deps:[10],core:false,title:"Tooling Landscape",desc:"Inspect, Braintrust, LangSmith, promptfoo, OpenAI Evals — names, strengths, tradeoffs.",anchor:{src:"promptfoo — docs & comparisons",url:"https://www.promptfoo.dev/docs/intro/"}},
+];
+const RANKS=[{min:0,name:"Vibes-Based Novice"},{min:1,name:"Apprentice Evaluator"},{min:4,name:"Eval Practitioner"},{min:8,name:"Eval Engineer"},{min:11,name:"Senior Evaluator"},{min:13,name:"Leading Expert"}];
+const ORDER=[1,2,5,4,3,9,7,8,10,11,6,12,13];
+const INTERVALS=[1,3,7,16,35]; const DAY=86400000;
+const $=id=>document.getElementById(id);
+const isProxy=()=>location.protocol==='http:'||location.protocol==='https:';
+
+/* theme */
+const TKEY='evalCodex.theme',root=document.documentElement,tbtn=$('themeBtn');
+function applyTheme(t){root.setAttribute('data-theme',t);tbtn.textContent=(t==='dark'?'☀':'☾');localStorage.setItem(TKEY,t);}
+applyTheme(localStorage.getItem(TKEY)||'light');
+tbtn.addEventListener('click',()=>applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+/* settings */
+const KKEY='evalCodex.key',MKEY='evalCodex.model';
+function getKey(){return localStorage.getItem(KKEY)||'';}
+function getModel(){return localStorage.getItem(MKEY)||'claude-sonnet-4-6';}
+const settingsModal=$('settingsModal');
+function openSettings(){
+  const proxy=isProxy();
+  $('setModel').value=getModel();
+  $('setKey').disabled=proxy;
+  $('setKey').value=proxy?'':getKey();
+  $('setKey').placeholder=proxy?'not needed — key comes from your environment':'sk-ant-...';
+  $('setIntro').textContent=proxy
+    ?'Running via the local proxy. Your key is loaded server-side from your environment, so you do NOT enter it here — leave it blank. Anything typed here would just sit in this browser and is ignored anyway. Pick a model and Save.'
+    :"The tutor calls the Anthropic API directly with your key. It's stored only in this browser (localStorage), sent only to api.anthropic.com, and never written into the repo. Use a dedicated, spend-capped key, and don't host this file publicly with a key saved.";
+  $('setNote').className='modal-note';
+  $('setNote').textContent=proxy?'Key field disabled in proxy mode — just choose a model.':'If a model name is rejected, update it here — IDs change over time.';
+  settingsModal.classList.add('open');
+}
+$('setBtn').addEventListener('click',openSettings);
+$('setClose').addEventListener('click',()=>settingsModal.classList.remove('open'));
+settingsModal.addEventListener('click',e=>{if(e.target===settingsModal)settingsModal.classList.remove('open');});
+$('setSave').addEventListener('click',()=>{
+  const proxy=isProxy();
+  if(!proxy)localStorage.setItem(KKEY,$('setKey').value.trim());
+  localStorage.setItem(MKEY,$('setModel').value);
+  const label=$('setModel').options[$('setModel').selectedIndex].text.split(' —')[0];
+  const note=$('setNote');note.className='modal-note ok';
+  note.textContent=proxy?('Saved — model set to '+label+'. Close this and start a session.'):($('setKey').value.trim()?'Saved. You\'re ready — close this and start a session.':'Saved (no key set — sessions need a key).');
+});
+
+/* state */
+const KEY='evalCodex.v1';
+let _raw=JSON.parse(localStorage.getItem(KEY)||'{}'),state={};
+for(const k in _raw){const v=_raw[k];state[k]=(typeof v==='string')?{s:v}:v;}
+const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+const rec=id=>state[id]||{s:'todo'};
+const getS=id=>rec(id).s;
+function setStatus(id,s){const r=rec(id);const prev=r.s;if(s==='solid'){if(r.s!=='solid'){r.rev=Date.now();r.step=0;}}else{delete r.rev;delete r.step;}r.s=s;state[id]=r;save();if(prev!==s)logEvent({type:'status',nodeId:id,from:prev,to:s});}
+function markReviewed(id){const r=rec(id);if(r.s==='solid'){r.step=Math.min((r.step||0)+1,INTERVALS.length-1);r.rev=Date.now();state[id]=r;save();logEvent({type:'review',nodeId:id,step:r.step});}}
+function dueMs(id){const r=rec(id);if(r.s!=='solid'||!r.rev)return null;return (r.rev+INTERVALS[r.step||0]*DAY)-Date.now();}
+const isDue=id=>{const d=dueMs(id);return d!==null&&d<=0;};
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmt=ts=>{try{return new Date(ts).toLocaleString();}catch(_){return ts;}};
+function logEvent(ev){
+  if(isProxy()){fetch('/api/log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(ev)}).catch(()=>{});return;}
+  try{const h=JSON.parse(localStorage.getItem('evalCodex.history')||'[]');h.push(Object.assign({ts:new Date().toISOString()},ev));localStorage.setItem('evalCodex.history',JSON.stringify(h));}catch(_){}
+}
+
+/* build tiers */
+const tree=$('tree'),tiers={};
+NODES.forEach(n=>{(tiers[n.tier]=tiers[n.tier]||[]).push(n);});
+Object.keys(tiers).sort((a,b)=>a-b).forEach((t,ti)=>{
+  const row=document.createElement('div');row.className='tier';
+  tiers[t].forEach(n=>{
+    const el=document.createElement('div');el.className='node';el.dataset.id=n.id;el.dataset.state=getS(n.id);
+    el.style.animationDelay=(0.55+ti*0.13+Math.random()*0.06)+'s';
+    el.innerHTML=`${n.core?'<div class="crest">◆</div>':''}<div class="due-badge">↻</div>
+      <div class="node-core"><div class="node-num">NODE ${String(n.id).padStart(2,'0')}</div>
+      <div class="node-title">${n.title}</div><div class="node-status">${getS(n.id)}</div></div>`;
+    el.addEventListener('click',()=>openDrawer(n.id));row.appendChild(el);
+  });
+  tree.appendChild(row);
+});
+
+/* connectors */
+const svg=$('links');
+function drawLinks(){
+  [...svg.querySelectorAll('path')].forEach(p=>p.remove());
+  const tr=tree.getBoundingClientRect();svg.setAttribute('viewBox',`0 0 ${tr.width} ${tr.height}`);
+  const center=el=>{const r=el.getBoundingClientRect();return{x:r.left-tr.left+r.width/2,y:r.top-tr.top+r.height/2};};
+  NODES.forEach(n=>{if(!n.deps.length)return;const child=tree.querySelector(`.node[data-id="${n.id}"]`);if(!child)return;const c=center(child);
+    n.deps.forEach(d=>{const par=tree.querySelector(`.node[data-id="${d}"]`);if(!par)return;const p=center(par);const my=(p.y+c.y)/2;
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',`M ${p.x} ${p.y+34} C ${p.x} ${my}, ${c.x} ${my}, ${c.x} ${c.y-40}`);
+      path.style.setProperty('--len',Math.hypot(c.x-p.x,c.y-p.y)+120);
+      path.style.animationDelay=(0.7+n.tier*0.12)+'s, '+(0.7+n.tier*0.12)+'s';svg.appendChild(path);});});
+}
+window.addEventListener('load',()=>setTimeout(drawLinks,90));
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(drawLinks,150);});
+
+/* HUD */
+function refresh(){
+  let solid=0,shaky=0,gap=0,todo=0,s1=0,s2=0,due=0;
+  NODES.forEach(n=>{const s=getS(n.id);if(s==='solid'){solid++;n.core?s1++:s2++;}else if(s==='shaky')shaky++;else if(s==='gap')gap++;else todo++;if(isDue(n.id))due++;});
+  $('cSolid').textContent=solid;$('cShaky').textContent=shaky;$('cGap').textContent=gap;$('cTodo').textContent=todo;
+  $('s1').textContent=s1+'/8';$('s2').textContent=s2+'/5';$('dueCount').textContent=due;
+  $('reviewPill').classList.toggle('has',due>0);
+  $('xpFill').style.width=Math.round(solid/13*100)+'%';$('xpCount').textContent=solid+' / 13 solid';
+  let rank=RANKS[0];RANKS.forEach(r=>{if(solid>=r.min)rank=r;});$('rankName').textContent=rank.name;
+  const next=RANKS.find(r=>r.min>solid);$('xpNext').textContent=next?((next.min-solid)+' to '+next.name):'★ maxed';
+  NODES.forEach(n=>{const el=tree.querySelector(`.node[data-id="${n.id}"]`);if(el){el.dataset.state=getS(n.id);el.dataset.due=isDue(n.id)?'1':'';el.querySelector('.node-status').textContent=isDue(n.id)?'review due':getS(n.id);}});
+}
+
+/* ===== system prompts ===== */
+function nodeRef(n){return `Node ${String(n.id).padStart(2,'0')} "${n.title}" — covers: ${n.desc} Canonical anchor: ${n.anchor.src} (${n.anchor.url}).`;}
+function singleSystem(n){
+  return `You are an expert AI-evaluation tutor inside the "learn-ai-eval" app. The learner is an applied AI engineer who is NEW to eval fundamentals. Be warm, direct, rigorous, and concise. Ground everything in the canonical anchor. Use short paragraphs and **bold** for key terms.
+
+CRITICAL: Run ONE step at a time and WAIT for the learner's reply before moving on. Never output the whole protocol or multiple steps at once.
+
+TODAY'S NODE — ${nodeRef(n)}
+
+PROTOCOL:
+1. PREDICT: ask them to predict 0-100% how they'll score today. Acknowledge the number.
+2. TEACH: explain at smart-practitioner / no-prior-101 depth with TWO varied concrete examples, consistent with the anchor.
+3. CAPTURE: ask them to write the key ideas in their OWN words; wait.
+4. QUIZ: 3-4 cold-recall questions from their notes, including one "when would you NOT use this?".
+5. GRADE: score vs their notes AND the anchor; compare to their prediction (over/under-confident?); name gaps; state whether they hit "solid" = can reconstruct the method AND name a failure mode.
+6. REMEDIATE: re-teach only gaps, then re-quiz those.
+7. TRANSFER: finish with one open-ended interview-style question.
+
+Start now with step 1 only.`;
+}
+function dailySystem(){
+  const newId=ORDER.find(id=>{const s=getS(id);return s==='todo'||s==='gap'||s==='shaky';});
+  const nn=NODES.find(n=>n.id===newId);
+  const due=NODES.filter(n=>isDue(n.id));
+  const dueRefs=due.length?due.map(nodeRef).join('  '):'none yet';
+  const newRef=nn?nodeRef(nn):'All nodes started — make today a pure interleaved review session.';
+  return {newId, sys:`You are an expert AI-evaluation tutor inside the "learn-ai-eval" app, running TODAY'S session with metalearning best practices (retrieval, spacing, interleaving, generation, calibration, transfer). The learner is an applied AI engineer NEW to eval fundamentals. Be warm, direct, concise; **bold** key terms; ground in the anchors.
+
+CRITICAL: ONE step at a time; WAIT for replies; never dump the whole protocol.
+
+NEW NODE — ${newRef}
+DUE FOR REVIEW (interleave, do not batch) — ${dueRefs}
+
+PROTOCOL:
+1. PREDICT: ask them to predict 0-100% how they'll do today.
+2. NEW NODE: Anchor → Teach (smart-practitioner depth, TWO varied concrete examples) → ask for notes in their OWN words → 3-4 cold-recall questions incl. one "when would you NOT use this?".
+3. INTERLEAVED REVIEW: for each due node, quiz FIRST from a blank page (generation effect, no re-teaching first), mixing topics. Re-teach only what they miss.
+4. TRANSFER: one open-ended interview-style question combining today's node with a past one.
+5. GRADE vs notes AND anchors; compare to their prediction; say which nodes are now "solid".
+
+Start now with step 1 only.`};
+}
+
+/* ===== chat engine ===== */
+const chatOverlay=$('chatOverlay'),chatMsgs=$('chatMsgs'),chatText=$('chatText'),chatSend=$('chatSend');
+let session=null; // {key, sysKey, system, messages, nodeId}
+function mdToHtml(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\n/g,'<br>');
+}
+function renderChat(){
+  chatMsgs.innerHTML='';
+  session.messages.forEach(m=>{
+    if(m.role==='system_note'){const d=document.createElement('div');d.className='msg sys';d.textContent=m.content;chatMsgs.appendChild(d);return;}
+    const d=document.createElement('div');d.className='msg '+(m.role==='assistant'?'a':'u');d.innerHTML=mdToHtml(m.content);chatMsgs.appendChild(d);
+  });
+  chatMsgs.scrollTop=chatMsgs.scrollHeight;
+}
+function saveSession(){if(session)localStorage.setItem('evalCodex.chat.'+session.sysKey,JSON.stringify({system:session.system,messages:session.messages,nodeId:session.nodeId}));}
+function showTyping(on){
+  let t=$('typingRow');
+  if(on){if(!t){t=document.createElement('div');t.className='typing';t.id='typingRow';t.innerHTML='tutor is thinking<span>.</span><span>.</span><span>.</span>';chatMsgs.appendChild(t);chatMsgs.scrollTop=chatMsgs.scrollHeight;}}
+  else if(t)t.remove();
+}
+function chatError(msg){const d=document.createElement('div');d.className='msg err';d.textContent=msg;chatMsgs.appendChild(d);chatMsgs.scrollTop=chatMsgs.scrollHeight;}
+
+async function callClaude(){
+  const proxy=isProxy();
+  if(!proxy&&!getKey()){chatError('No API key set. Click ⚙ (top-right) and paste your Anthropic key — or run the local proxy (see RUN.md) so no key is needed in the browser.');return null;}
+  const apiMsgs=session.messages.filter(m=>m.role==='assistant'||m.role==='user').map(m=>({role:m.role,content:m.content}));
+  try{
+    const url=proxy?'/api/messages':'https://api.anthropic.com/v1/messages';
+    const headers=proxy?{'content-type':'application/json'}:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+    const res=await fetch(url,{
+      method:'POST',headers,
+      body:JSON.stringify({model:getModel(),max_tokens:2000,system:session.system,messages:apiMsgs})
+    });
+    if(!res.ok){
+      let detail='';try{const e=await res.json();detail=e.error?.message||JSON.stringify(e);}catch(_){detail=await res.text();}
+      if(res.status===401)chatError('401 — your API key was rejected. Open ⚙ and re-check it.');
+      else if(res.status===404)chatError('404 — model "'+getModel()+'" not found. Open ⚙ and pick/correct the model ID.');
+      else if(res.status===429)chatError('429 — rate limited or out of credit. Wait a moment or check your Anthropic billing.');
+      else chatError('API error '+res.status+': '+detail);
+      return null;
+    }
+    const data=await res.json();
+    return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+  }catch(err){
+    chatError('Network/CORS error: '+err.message+'. (If this persists, the direct-browser header may be blocked by your network.)');
+    return null;
+  }
+}
+async function turn(){
+  chatSend.disabled=true;showTyping(true);
+  const reply=await callClaude();
+  showTyping(false);chatSend.disabled=false;
+  if(reply){session.messages.push({role:'assistant',content:reply});renderChat();saveSession();logEvent({type:'message',session:session.sysKey,role:'assistant',content:reply});}
+  chatText.focus();
+}
+function startSession(mode,id){
+  if(!isProxy()&&!getKey()){openSettings();$('setNote').className='modal-note err';$('setNote').textContent='Paste your Anthropic API key first, then start a session.';return;}
+  closeDrawer();
+  let sysKey,system,nodeId=null,title,modeLabel;
+  if(mode==='single'){const n=NODES.find(x=>x.id===id);sysKey='node'+id;system=singleSystem(n);nodeId=id;title=n.title;modeLabel='single node · '+(n.core?'core-8':'sprint-2');}
+  else{const d=dailySystem();sysKey='daily';system=d.sys;nodeId=d.newId;title="Today's Session";modeLabel='daily · new + interleaved review';}
+  $('chatNode').textContent=title;$('chatMode').textContent=modeLabel;
+  $('chatSolid').style.display=(mode==='single')?'inline-block':'none';
+  $('chatSolid').dataset.node=nodeId||'';
+  const saved=JSON.parse(localStorage.getItem('evalCodex.chat.'+sysKey)||'null');
+  if(saved&&saved.messages&&saved.messages.length){session={sysKey,system:saved.system||system,messages:saved.messages,nodeId};renderChat();chatOverlay.classList.add('open');chatText.focus();}
+  else{session={sysKey,system,messages:[{role:'user',content:'Begin the session now.'}],nodeId};
+    logEvent({type:'session_start',session:sysKey,title,mode:modeLabel,model:getModel(),nodeId});
+    session.messages.push({role:'system_note',content:'Session started · '+getModel()});
+    chatOverlay.classList.add('open');renderChat();
+    // first assistant turn
+    session.messages=session.messages.filter(m=>m.role!=='system_note').concat([{role:'system_note',content:'Session started · '+getModel()}]);
+    turn();
+  }
+}
+function sendUser(){
+  const v=chatText.value.trim();if(!v||chatSend.disabled)return;
+  session.messages.push({role:'user',content:v});chatText.value='';chatText.style.height='auto';renderChat();saveSession();logEvent({type:'message',session:session.sysKey,role:'user',content:v});turn();
+}
+chatSend.addEventListener('click',sendUser);
+chatText.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendUser();}});
+chatText.addEventListener('input',()=>{chatText.style.height='auto';chatText.style.height=Math.min(chatText.scrollHeight,140)+'px';});
+$('chatClose').addEventListener('click',()=>chatOverlay.classList.remove('open'));
+chatOverlay.addEventListener('click',e=>{if(e.target===chatOverlay)chatOverlay.classList.remove('open');});
+$('chatReset').addEventListener('click',()=>{if(session){localStorage.removeItem('evalCodex.chat.'+session.sysKey);const m=session.sysKey==='daily'?'daily':'single';const id=session.nodeId;chatOverlay.classList.remove('open');startSession(session.sysKey==='daily'?'daily':'single',id);}});
+$('chatSolid').addEventListener('click',()=>{const id=+$('chatSolid').dataset.node;if(id){setStatus(id,'solid');refresh();const b=$('chatSolid');b.textContent='✓ marked solid';setTimeout(()=>b.textContent='✓ mark solid',1800);}});
+
+/* daily button */
+$('dailyBtn').addEventListener('click',()=>startSession('daily'));
+
+/* history / audit trail */
+const histOverlay=$('histOverlay'),histBody=$('histBody');
+async function fetchEvents(){
+  if(isProxy()){try{const r=await fetch('/api/history');const j=await r.json();return (j.events||[]).map(l=>{try{return JSON.parse(l);}catch(_){return null;}}).filter(Boolean);}catch(_){return [];}}
+  try{return JSON.parse(localStorage.getItem('evalCodex.history')||'[]');}catch(_){return [];}
+}
+function renderHistory(events){
+  if(!events.length){histBody.innerHTML='<div class="h-empty">Nothing recorded yet.<br>Start a session and every message, status change, and review will be logged here.</div>';return;}
+  let html='',cur=null;
+  events.forEach(e=>{
+    if(e.type==='session_start'){cur=e.session;html+=`<div class="h-sess">${esc(e.title||e.session)}</div><div class="h-meta">${fmt(e.ts)} · ${esc(e.mode||'')} · ${esc(e.model||'')}</div>`;}
+    else if(e.type==='message'){if(e.session!==cur){cur=e.session;html+=`<div class="h-sess">${esc(e.session)}</div>`;}html+=`<div class="h-msg"><span class="who">${e.role==='user'?'You':'Tutor'} · ${fmt(e.ts)}</span>${esc(e.content)}</div>`;}
+    else if(e.type==='status'){html+=`<div class="h-tl">⬢ ${fmt(e.ts)} — node ${e.nodeId}: ${esc(e.from)} → ${esc(e.to)}</div>`;}
+    else if(e.type==='review'){html+=`<div class="h-tl">↻ ${fmt(e.ts)} — node ${e.nodeId} reviewed (step ${e.step})</div>`;}
+  });
+  histBody.innerHTML=html;histBody.scrollTop=0;
+}
+async function openHistory(){renderHistory(await fetchEvents());histOverlay.classList.add('open');}
+async function exportHistory(){
+  const events=await fetchEvents();
+  let md='# The Eval Codex — Learning History\n\n_Exported '+new Date().toLocaleString()+'_\n';
+  events.forEach(e=>{
+    if(e.type==='session_start')md+=`\n\n## ${e.title||e.session} — ${fmt(e.ts)}\n_${e.mode||''} · ${e.model||''}_\n\n`;
+    else if(e.type==='message')md+=`**${e.role==='user'?'You':'Tutor'}:** ${e.content}\n\n`;
+    else if(e.type==='status')md+=`> status: node ${e.nodeId} ${e.from} → ${e.to} (${fmt(e.ts)})\n`;
+    else if(e.type==='review')md+=`> review: node ${e.nodeId} step ${e.step} (${fmt(e.ts)})\n`;
+  });
+  const blob=new Blob([md],{type:'text/markdown'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='eval-codex-history-'+new Date().toISOString().slice(0,10)+'.md';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+}
+$('histBtn').addEventListener('click',openHistory);
+$('histClose').addEventListener('click',()=>histOverlay.classList.remove('open'));
+histOverlay.addEventListener('click',e=>{if(e.target===histOverlay)histOverlay.classList.remove('open');});
+$('histExport').addEventListener('click',exportHistory);
+
+/* drawer */
+const drawer=$('drawer'),scrim=$('scrim'),dbody=$('drawerBody');
+function reviewBlock(id){const d=dueMs(id);if(d===null)return '';const days=Math.ceil(d/DAY);
+  const label=d<=0?'DUE NOW — quiz before re-reading':('next review in '+days+' day'+(days===1?'':'s'));
+  return `<div class="section-l">Spaced review</div><div class="review-box ${d<=0?'due':''}"><span>${label}</span><button class="revbtn" id="revBtn">✓ Mark reviewed</button></div>`;}
+function openDrawer(id){
+  const n=NODES.find(x=>x.id===id),cur=getS(id);
+  dbody.innerHTML=`<div class="num">NODE ${String(n.id).padStart(2,'0')} ${n.core?'· ◆ core-8':'· sprint-2'}</div>
+    <h3>${n.title}</h3><div class="desc">${n.desc}</div>
+    <div class="section-l">Status</div>
+    <div class="status-row">${['todo','gap','shaky','solid'].map(s=>`<button class="sbtn ${cur===s?'active':''}" data-s="${s}">${s}</button>`).join('')}</div>
+    ${reviewBlock(id)}
+    <div class="section-l">Tutor</div>
+    <button class="startbtn" id="startBtn">▶ Start tutor session</button>
+    <button class="copy-link" id="copyP">or copy the prompt for Claude Code instead</button>
+    <div class="section-l">Canonical anchor</div>
+    <div class="anchor-box"><div class="src">${n.anchor.src}</div><a href="${n.anchor.url}" target="_blank" rel="noopener">${n.anchor.url}</a></div>
+    <div class="section-l">The loop</div>
+    <ol class="loopsteps">
+      <li><b>Anchor</b> — grading checks against the canon, not just your notes.</li>
+      <li><b>Teach</b> — smart-practitioner depth, two concrete examples.</li>
+      <li><b>Capture</b> — you rewrite it in your own words.</li>
+      <li><b>Quiz</b> — cold recall + one "when NOT to use this".</li>
+      <li><b>Grade</b> — vs notes AND anchor; gaps named.</li>
+      <li><b>Remediate + Transfer</b> — re-quiz gaps, end on a mock-interview question.</li>
+    </ol>
+    ${n.teach?`<div class="section-l">Quick reference</div><div class="teach">${n.teach}</div>`:''}`;
+  dbody.querySelectorAll('.sbtn').forEach(b=>b.addEventListener('click',()=>{setStatus(id,b.dataset.s);refresh();openDrawer(id);}));
+  const rb=dbody.querySelector('#revBtn');if(rb)rb.addEventListener('click',()=>{markReviewed(id);refresh();openDrawer(id);});
+  dbody.querySelector('#startBtn').addEventListener('click',()=>startSession('single',id));
+  dbody.querySelector('#copyP').addEventListener('click',()=>{navigator.clipboard.writeText(singleSystem(n)+'\n\n(Paste into Claude Code to run this node on your Max subscription instead of the API.)');const c=dbody.querySelector('#copyP');c.textContent='✓ copied';setTimeout(()=>c.textContent='or copy the prompt for Claude Code instead',1800);});
+  drawer.classList.add('open');scrim.classList.add('open');
+}
+function closeDrawer(){drawer.classList.remove('open');scrim.classList.remove('open');}
+$('close').addEventListener('click',closeDrawer);
+scrim.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();chatOverlay.classList.remove('open');settingsModal.classList.remove('open');histOverlay.classList.remove('open');}});
+$('reviewPill').addEventListener('click',()=>{const d=NODES.find(n=>isDue(n.id));if(d)openDrawer(d.id);});
+
+refresh();
+/* first-run nudge */
+if(!isProxy()&&!getKey())setTimeout(openSettings,700);
+</script>
+</body>
+</html>
