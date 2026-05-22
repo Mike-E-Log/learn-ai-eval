@@ -1,7 +1,17 @@
-# The Eval Codex
+<p align="center">
+  <img alt="canon%20nodes" src="https://img.shields.io/badge/canon%20nodes-13-7c3aed?style=flat-square&labelColor=0f172a"/>
+  <img alt="loop" src="https://img.shields.io/badge/loop-retrieval%20%2B%20spaced%20review-0ea5e9?style=flat-square&labelColor=0f172a"/>
+  <img alt="key" src="https://img.shields.io/badge/key-localhost--only%20proxy-22c55e?style=flat-square&labelColor=0f172a"/>
+  <img alt="status" src="https://img.shields.io/badge/status-frozen%20baseline-f59e0b?style=flat-square&labelColor=0f172a"/>
+</p>
 
-> A Claude-tutored engine for getting fluent in AI evaluation, fast — a gamified
-> skill tree, spaced repetition, and an in-app tutor.
+<h2 align="center">learn-ai-eval · The Eval Codex</h2>
+
+<p align="center">
+  <em>A Claude-tutored learning engine — 13 AI-eval fundamentals as a gamified skill tree,<br/>tutored through a spaced-repetition loop grounded in canonical sources.</em>
+</p>
+
+---
 
 ![The Eval Codex — a gamified skill tree of the AI-eval canon, tutored by Claude](docs/screenshot.png)
 
