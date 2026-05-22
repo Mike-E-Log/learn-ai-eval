@@ -3,6 +3,8 @@
 > A Claude-tutored engine for getting fluent in AI evaluation, fast — a gamified
 > skill tree, spaced repetition, and an in-app tutor.
 
+![The Eval Codex — a gamified skill tree of the AI-eval canon, tutored by Claude](docs/screenshot.png)
+
 **What it is.** A personal learning engine for getting conversant in the
 AI-evaluation canon and staying current. It turns the 13 core eval fundamentals
 into a gamified skill tree, tutors each one with Claude through a spaced-repetition
@@ -20,8 +22,6 @@ loop grounded in canonical sources, and keeps a full audit trail of what was lea
 - **Eval domain** — the curriculum maps the canon: LLM-as-judge & its biases,
   eval datasets & contamination, metrics, agentic/trajectory eval, benchmarks &
   Goodhart, statistics for eval, RAG eval, red-teaming.
-
-<!-- ![The Eval Codex](docs/screenshot.png) — add a screenshot here; biggest single upgrade -->
 
 ## How it works
 - **Skill tree** — 13 nodes (the eval canon). Each: status `todo → gap → shaky →
